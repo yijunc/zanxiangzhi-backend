@@ -96,10 +96,10 @@ return [
             'password' => env('REDIS_PASSWORD', null),
         ],
 
-        'wx_auth' => [
+        'device' => [
             'host' => '120.24.250.38',
             'port' => 6379,
-            'database' => 2,
+            'database' => 1,
             'password' => 'Cezhi12345'
         ]
 
