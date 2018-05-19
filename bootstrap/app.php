@@ -53,7 +53,7 @@ $app->singleton(
 | Register Configurations
 |--------------------------------------------------------------------------
 */
-
+$app->configure("app");
 $app->configure("wechat");
 
 require_once __DIR__."/../App/Helpers/common.php";
