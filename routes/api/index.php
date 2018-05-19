@@ -13,8 +13,9 @@ $router->group([
     $router->get("/device/get_status", "DeviceController@getStatus");
 
 
+//    user相关
 //    $router->get("/user/get_left_times", ["middleware"=>["auth"], "uses"=>"UserController@getLeftTimes"]);
-
     $router->addRoute(['GET', 'POST'], "/user/get_left_times", ["middleware"=>["auth"], "uses"=>"UserController@getLeftTimes"]);
+    $router->addRoute(['GET', 'POST'], "/user/use_toilet_paper", ["middleware"=>["auth"], "uses"=>"UserController@useToiletPaper"]);
 
 });

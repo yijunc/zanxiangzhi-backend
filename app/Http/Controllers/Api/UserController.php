@@ -10,21 +10,83 @@ namespace App\Http\Controllers\Api;
 
 
 use App\Http\Controllers\Controller;
+use App\Models\Device;
+use App\Models\Meta;
+use App\Models\User;
+use App\Models\UserRecord;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
     public function getLeftTimes(){
         $user = Auth::user();
-        $last_pull_down = date('Y-m-d',$user->last_pull_down);
-        $pull_down_times = $user->pull_down_times;
+        $lastPullDown = date('Y-m-d',$user->last_pull_down);
+        $pullDownTimes = $user->pull_down_times;
         $times = config('app.pull_down_times_per_day');
         $today = date('Y-m-d');
-        if($last_pull_down!=$today) {
-            $pull_down_times = $times;
+        $leftTimes = $times - $pullDownTimes;
+        if($lastPullDown!=$today) {
+            $leftTimes = $times;
         }
         return s("ok",[
-            "pull_down_times" => $pull_down_times
+            "left_times" => $leftTimes
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function useToiletPaper(Request $request){
+        /**
+         * @var User $user
+         */
+        //判断机器可用
+        $this->validate($request, [
+            'device_id' => 'required|integer'
+        ]);
+        $device_id = $request->input("device_id");
+        $deviceController = new DeviceController();
+        $retDevice = $deviceController->getDevice($device_id);
+        if($retDevice->status == 0)
+        {
+            return f(1,"device unavailable");
+        }
+        //判断用户剩余抽纸次数并验证
+        $user = Auth::user();
+        $ret = $this->getLeftTimes();
+        $ret = $ret->content();
+        $retLeftTimes = json_decode($ret);
+        $leftTimes = $retLeftTimes->data->left_times;
+        $times = config('app.pull_down_times_per_day');
+        if($leftTimes==0){
+            return f(2);
+        }
+        $user->last_pull_down = time();
+        $user->pull_down_times = $times-$leftTimes + 1;
+        $user->save();
+
+        //增加用户记录
+        $userRecord = new UserRecord();
+        $userRecord->create([
+            "user_id"=>$user->id,
+            "device_id" => $device_id,
+            "type" => 0,
+            "status" => 0
+        ]);
+        //点赞元数据增加
+        $meta = (new Meta())->findOrFail($device_id);
+        $meta->value += 1;
+        $meta->saveOrFail();
+        //机器使用次数更新
+        $device = (new Device())->findOrFail($device_id);
+        $device->update(["used_count"=>$device->used_count +1 ]);
+        //返回剩余可用次数
+        return s("ok",[
+            "left_times" => $leftTimes-1
         ]);
     }
 

@@ -26,13 +26,18 @@ class DeviceController extends Controller
             'id' => 'required|integer'
         ]);
         $id = $request->input("id");
-        $redis = Redis::connection('device');
-        $device = $redis->get('device:'.$id);
-        $device = json_decode($device);
+        $device = $this->getDevice($id);
         return s("ok", [
             'status' => $device->status,
             'last_active' => $device->last_active
         ]);
+    }
+
+    public function getDevice(int $id){
+        $redis = Redis::connection('device');
+        $device = $redis->get('device:'.$id);
+        $device = json_decode($device);
+        return $device;
     }
 
 }
