@@ -13,13 +13,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Device extends Model
 {
-    /**
-     * @var array
-     */
-    protected $fillable = [
-        'id', 'tag', 'location_desc', 'location_id','is_online','used_count','created_at','updated_at'
-    ];
-
-    protected $hidden = [];
 
 }
