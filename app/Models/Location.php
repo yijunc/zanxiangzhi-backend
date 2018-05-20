@@ -1,9 +1,9 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: Dizy
- * Date: 2018/5/17
- * Time: 22:12
+ * User: ubuntu
+ * Date: 5/20/18
+ * Time: 1:51 PM
  */
 
 namespace App\Models;
@@ -11,7 +11,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Device extends Model
+class Location extends Model
 {
 
 }

@@ -8,7 +8,6 @@
 
 namespace Junning\GeoHash;
 
-
 class GeoHash {
     private $bitss = array(16, 8, 4, 2, 1);
     private $neighbors = array();
@@ -17,7 +16,7 @@ class GeoHash {
     private $coding = "0123456789bcdefghjkmnpqrstuvwxyz";
     private $codingMap = array();
 
-    public function GeoHash() {
+    public function __construct() {
 
         $this->neighbors['right']['even'] = 'bc01fg45238967deuvhjyznpkmstqrwx';
         $this->neighbors['left']['even'] = '238967debc01fg45kmstqrwxuvhjyznp';
@@ -110,6 +109,12 @@ class GeoHash {
     }
 
 
+    /**
+     *
+     * Get Neighbours in according to a given hash.
+     * @param $srcHash
+     * @return mixed
+     */
     public function neighbors($srcHash) {
 
         $geohashPrefix = substr($srcHash, 0, strlen($srcHash) - 1);
@@ -205,9 +210,6 @@ class GeoHash {
         return $hash;
     }
 
-    /**
-     * What's the maximum error for $bits bits covering a range $min to $max
-     */
     private function calcError($bits, $min, $max) {
 
         $err = ($max - $min) / 2;
@@ -216,14 +218,6 @@ class GeoHash {
         return $err;
     }
 
-    /*
-    * returns precision of number
-    * precision of 42 is 0.5
-    * precision of 42.4 is 0.05
-    * precision of 42.41 is 0.005 etc
-    *
-    *
-    */
     private function precision($number) {
 
         $precision = 0;
@@ -236,13 +230,6 @@ class GeoHash {
         return pow(10, $precision) / 2;
     }
 
-
-    /**
-     * create binary encoding of number as detailed in http://en.wikipedia.org/wiki/Geohash#Example
-     * removing the tail recursion is left an exercise for the reader
-     *
-     * Author: Bruce Chen (weibo: @一个开发者)
-     */
     private function binEncode($number, $min, $max, $bitcount) {
 
         if ($bitcount == 0)
@@ -259,15 +246,6 @@ class GeoHash {
             return "0" . $this->binEncode($number, $min, $mid, $bitcount - 1);
     }
 
-    /**
-     *
-     *
-     *
-     * decodes binary encoding of number as detailed in http://en.wikipedia.org/wiki/Geohash#Example
-     * removing the tail recursion is left an exercise for the reader
-     *
-     *
-     */
     private function binDecode($binary, $min, $max) {
 
         $mid = ($min + $max) / 2;
