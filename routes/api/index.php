@@ -17,5 +17,8 @@ $router->group([
     $router->addRoute(['GET', 'POST'], "/user/get_left_times", ["middleware" => ["auth"], "uses" => "UserController@getLeftTimes"]);
     $router->addRoute(['GET', 'POST'], "/user/use_toilet_paper", ["middleware" => ["auth"], "uses" => "UserController@useToiletPaper"]);
 
+
+    //    location related
     $router->get("/location/get_nearby_locations", "LocationController@getNearbyLocations");
+    $router->get("/location/add_location", "LocationController@addLocation");
 });

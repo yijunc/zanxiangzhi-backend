@@ -10,12 +10,39 @@ namespace App\Http\Controllers\Api;
 
 
 use App\Http\Controllers\Controller;
+use App\Models\Location;
 use Illuminate\Http\Request;
 
 use Junning\GeoHash\GeoHash;
 
 class LocationController extends Controller
 {
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     * @throws \Throwable
+     */
+    public function addLocation(Request $request){
+        $this->validate($request, [
+            'name' => 'required',
+            'longitude' => 'required|numeric',
+            'latitude' => 'required|numeric',
+        ]);
+        $latitude = $request->input('latitude');
+        $longitude = $request->input('longitude');
+        $location = new Location();
+        $location->create([
+            'name' => $request->input('name'),
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'geo_hash' => (new GeoHash())->encode($latitude, $longitude),
+            'desc' => $request->input('desc')
+        ]);
+        return s('ok');
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -26,16 +53,22 @@ class LocationController extends Controller
             'longitude' => 'required|numeric',
             'latitude' => 'required|numeric'
         ]);
-        $longtitude = $request->input("longitude");
-        $latitude = $request->input("latitude");
+        $longitude = $request->input('longitude');
+        $latitude = $request->input('latitude');
         $geohash = new GeoHash();
-        $current_loction_hash = $geohash->encode($latitude, $longtitude);
-        $location_prefix = substr($current_loction_hash, 0, 7);
+        $current_location_hash = $geohash->encode($latitude, $longitude);
+        $location_prefix = substr($current_location_hash, 0, 6);
         $neighbours = $geohash->neighbors($location_prefix);
         array_push($neighbours, $location_prefix);
-        //print_r($neighbours);
+        $locations = array();
+        foreach ($neighbours as $location){
+            $temp_block = Location::where('geo_hash', 'like', "{$location}%")->get();
+            foreach($temp_block as $loc){
+                array_push($locations, $loc);
+            }
+        }
         return s("ok", [
-            "neib" => $neighbours
+            "locations" => $locations
         ]);
     }
 
