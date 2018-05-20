@@ -53,10 +53,10 @@ $app->singleton(
 | Register Configurations
 |--------------------------------------------------------------------------
 */
-$app->configure("app");
+
 $app->configure("wechat");
 
-require_once __DIR__."/../App/Helpers/common.php";
+require_once __DIR__."/../app/Helpers/common.php";
 
 /*
 |--------------------------------------------------------------------------
@@ -75,7 +75,7 @@ require_once __DIR__."/../App/Helpers/common.php";
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
- ]);
+]);
 
 /*
 |--------------------------------------------------------------------------
