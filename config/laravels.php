@@ -34,6 +34,7 @@ return [
     'swoole_tables'      => [
     ],
     'register_providers' => [
+               \App\Providers\AuthServiceProvider::class
     ],
     'swoole'             => [
         'daemonize'          => env('LARAVELS_DAEMONIZE', true),

@@ -9,27 +9,35 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Device;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 
 class DeviceController extends Controller
 {
-
     /**
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function getStatus(Request $request){
+
+    public function getStatus(Request $request)
+    {
         $this->validate($request, [
             'id' => 'required|integer'
         ]);
         $id = $request->input("id");
-        $device = Device::fetchOrFailed($id);
+        $device = $this->getDevice($id);
         return s("ok", [
-           'status' => $device->status,
-           'last_active' => $device->updated_at
+            'status' => $device->status,
+            'last_active' => $device->last_active
         ]);
+    }
+
+    public function getDevice(int $id)
+    {
+        $redis = Redis::connection('device');
+        $device = $redis->get('device:' . $id);
+        $device = json_decode($device);
+        return $device;
     }
 
 }
