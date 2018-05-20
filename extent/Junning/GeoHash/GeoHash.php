@@ -8,13 +8,7 @@
 
 namespace Junning\GeoHash;
 
-/**
- *
- * Encode and decode geohashes
- *
- * Find neighbors
- *
- */
+
 class GeoHash {
     private $bitss = array(16, 8, 4, 2, 1);
     private $neighbors = array();
@@ -228,7 +222,7 @@ class GeoHash {
     * precision of 42.4 is 0.05
     * precision of 42.41 is 0.005 etc
     *
-    * Author: Bruce Chen (weibo: @一个开发者)
+    *
     */
     private function precision($number) {
 
@@ -266,10 +260,13 @@ class GeoHash {
     }
 
     /**
+     *
+     *
+     *
      * decodes binary encoding of number as detailed in http://en.wikipedia.org/wiki/Geohash#Example
      * removing the tail recursion is left an exercise for the reader
      *
-     * Author: Bruce Chen (weibo: @一个开发者)
+     *
      */
     private function binDecode($binary, $min, $max) {
 
