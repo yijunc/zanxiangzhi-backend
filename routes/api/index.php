@@ -9,5 +9,5 @@ $router->group([
 
     $router->get("/", "IndexController@index");
     $router->get("/device/get_status", "DeviceController@getStatus");
-
+    $router->get("/location/get_nearby_locations", "LocationController@getNearbyLocations");
 });
