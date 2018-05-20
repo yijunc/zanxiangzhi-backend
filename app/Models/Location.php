@@ -14,4 +14,10 @@ use Illuminate\Database\Eloquent\Model;
 class Location extends Model
 {
 
+    protected $fillable = [
+        'name', 'latitude', 'longitude', 'geo_hash', 'desc'
+    ];
+
+    protected $hidden = [];
+
 }
