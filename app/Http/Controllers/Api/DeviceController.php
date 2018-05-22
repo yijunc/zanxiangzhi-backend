@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 
@@ -40,4 +41,12 @@ class DeviceController extends Controller
         return $device;
     }
 
+    public function getDevicesByLocationId(Request $request){
+        $this->validate($request, [
+            'location_id' => 'required|integer'
+        ]);
+        $location_id = $request->input("location_id");
+        $devices = (new Device())->where('location_id','=', $location_id)->orderBy('floor')->get();
+        return $devices;
+    }
 }
