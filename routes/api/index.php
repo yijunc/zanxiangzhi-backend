@@ -10,6 +10,7 @@ $router->group([
 
     //    device相关
     $router->get("/device/get_status", "DeviceController@getStatus");
+    $router->addRoute(['GET', 'POST'], "/device/get_devices_by_location_id", "DeviceController@getDevicesByLocationId");
 
 
     //    user相关
