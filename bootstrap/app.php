@@ -55,6 +55,7 @@ $app->singleton(
 */
 
 $app->configure("wechat");
+$app->configure("usr");
 
 require_once __DIR__."/../app/Helpers/common.php";
 
