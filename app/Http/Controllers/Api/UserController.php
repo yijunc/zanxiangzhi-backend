@@ -16,20 +16,22 @@ use App\Models\User;
 use App\Models\UserRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Junning\Sdk\usr\MQTTClient;
 
 class UserController extends Controller
 {
-    public function getLeftTimes(){
+    public function getLeftTimes()
+    {
         $user = Auth::user();
-        $lastPullDown = date('Y-m-d',$user->last_pull_down);
+        $lastPullDown = date('Y-m-d', $user->last_pull_down);
         $pullDownTimes = $user->pull_down_times;
         $times = config('app.pull_down_times_per_day');
         $today = date('Y-m-d');
         $leftTimes = $times - $pullDownTimes;
-        if($lastPullDown!=$today) {
+        if ($lastPullDown != $today) {
             $leftTimes = $times;
         }
-        return s("ok",[
+        return s("ok", [
             "left_times" => $leftTimes
         ]);
     }
@@ -39,7 +41,8 @@ class UserController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function useToiletPaper(Request $request){
+    public function useToiletPaper(Request $request)
+    {
         /**
          * @var User $user
          */
@@ -48,11 +51,8 @@ class UserController extends Controller
             'device_id' => 'required|integer'
         ]);
         $device_id = $request->input("device_id");
-        $deviceController = new DeviceController();
-        $retDevice = $deviceController->getDevice($device_id);
-        if($retDevice->status == 0)
-        {
-            return f(1,"device unavailable");
+        if (DeviceController::getDeviceStatus($device_id)->status == 0) {
+            return f(1, "device unavailable");
         }
         //判断用户剩余抽纸次数并验证
         $user = Auth::user();
@@ -61,31 +61,42 @@ class UserController extends Controller
         $retLeftTimes = json_decode($ret);
         $leftTimes = $retLeftTimes->data->left_times;
         $times = config('app.pull_down_times_per_day');
-        if($leftTimes==0){
+        if ($leftTimes == 0) {
             return f(2);
         }
         $user->last_pull_down = time();
-        $user->pull_down_times = $times-$leftTimes + 1;
+        $user->pull_down_times = $times - $leftTimes + 1;
         $user->save();
+
+        // Push activation request into task queue.
+        $client = new MQTTClient();
+        $client->connect("珺柠", "junning_lc_2018");
+        $client->onConnect = function ($code, MQTTClient $client) {
+            $client->publish("\$USR/DevRx/356566078063039", "123", function (MQTTClient $client) {
+                echo "haha!!!!!!\n";
+                $client->disconnect();
+            });
+        };
 
         //增加用户记录
         $userRecord = new UserRecord();
         $userRecord->create([
-            "user_id"=>$user->id,
+            "user_id" => $user->id,
             "device_id" => $device_id,
             "type" => 0,
             "status" => 0
         ]);
+
         //点赞元数据增加
         $meta = (new Meta())->findOrFail($device_id);
         $meta->value += 1;
         $meta->saveOrFail();
         //机器使用次数更新
         $device = (new Device())->findOrFail($device_id);
-        $device->update(["used_count"=>$device->used_count +1 ]);
+        $device->update(["used_count" => $device->used_count + 1]);
         //返回剩余可用次数
-        return s("ok",[
-            "left_times" => $leftTimes-1
+        return s("ok", [
+            "left_times" => $leftTimes - 1
         ]);
     }
 

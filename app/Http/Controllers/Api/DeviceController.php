@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Redis;
 class DeviceController extends Controller
 {
     /**
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -27,14 +28,14 @@ class DeviceController extends Controller
             'id' => 'required|integer'
         ]);
         $id = $request->input("id");
-        $device = $this->getDevice($id);
+        $device = $this->getDeviceStatus($id);
         return s("ok", [
             'status' => $device->status,
             'last_active' => $device->last_active
         ]);
     }
 
-    public function getDevice(int $id)
+    public static function getDeviceStatus(int $id)
     {
         $redis = Redis::connection('device');
         $device = $redis->get('device:' . $id);
@@ -47,12 +48,13 @@ class DeviceController extends Controller
      * @return mixed
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function getDevicesByLocationId(Request $request){
+    public function getDevicesByLocationId(Request $request)
+    {
         $this->validate($request, [
             'location_id' => 'required|integer'
         ]);
         $location_id = $request->input("location_id");
-        $devices = (new Device())->where('location_id','=', $location_id)->orderBy('floor')->get();
+        $devices = (new Device())->where('location_id', '=', $location_id)->orderBy('floor')->get();
         return $devices;
     }
 
