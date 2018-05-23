@@ -10,6 +10,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Device;
+use App\Jobs\Tasks\DeviceActivator;
+use Hhxsv5\LaravelS\Swoole\Task\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 
@@ -19,7 +21,6 @@ class DeviceController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-
     public function getStatus(Request $request)
     {
         $this->validate($request, [
@@ -41,6 +42,11 @@ class DeviceController extends Controller
         return $device;
     }
 
+    /**
+     * @param Request $request
+     * @return mixed
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function getDevicesByLocationId(Request $request){
         $this->validate($request, [
             'location_id' => 'required|integer'
@@ -48,5 +54,18 @@ class DeviceController extends Controller
         $location_id = $request->input("location_id");
         $devices = (new Device())->where('location_id','=', $location_id)->orderBy('floor')->get();
         return $devices;
+    }
+
+    /**
+     * @param Request $request
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function activateDevice(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'required|integer'
+        ]);
+        $task = new DeviceActivator($request->input("id"));
+        Task::deliver($task);
     }
 }
