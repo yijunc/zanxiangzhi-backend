@@ -9,6 +9,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\Tasks\DeviceActivator;
+use Hhxsv5\LaravelS\Swoole\Task\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 
@@ -18,7 +20,6 @@ class DeviceController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-
     public function getStatus(Request $request)
     {
         $this->validate($request, [
@@ -39,5 +40,23 @@ class DeviceController extends Controller
         $device = json_decode($device);
         return $device;
     }
+
+    /**
+     * @param Request $request
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function activateDevice(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'required|integer'
+        ]);
+        $task = new DeviceActivator($request->input("id"));
+        Task::deliver($task);
+    }
+
+    
+
+
+
 
 }
