@@ -10,8 +10,9 @@ namespace App\Jobs\Timers;
 
 
 use App\Models\Device;
+use Hhxsv5\LaravelS\Swoole\Timer\CronJob;
 
-class DeviceCheckActiveJob
+class DeviceCheckActiveJob extends CronJob
 {
     protected $interval = 60 * 60 * 1000;
 
