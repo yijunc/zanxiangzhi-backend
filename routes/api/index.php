@@ -10,12 +10,11 @@ $router->group([
 
     //    device相关
     $router->get("/device/get_status", "DeviceController@getStatus");
-    $router->addRoute(['GET', 'POST'], "/device/get_devices_by_location_id", "DeviceController@getDevicesByLocationId");
-
+    $router->get("/device/get_devices_by_location_id", "DeviceController@getDevicesByLocationId");
 
     //    user相关
     //    $router->get("/user/get_left_times", ["middleware"=>["auth"], "uses"=>"UserController@getLeftTimes"]);
-    $router->addRoute(['GET', 'POST'], "/user/get_left_times", ["middleware" => ["auth"], "uses" => "UserController@getLeftTimes"]);
+    //    $router->addRoute(['GET', 'POST'], "/user/get_left_times", ["middleware" => ["auth"], "uses" => "UserController@getLeftTimes"]);
     $router->addRoute(['GET', 'POST'], "/user/use_toilet_paper", ["middleware" => ["auth"], "uses" => "UserController@useToiletPaper"]);
 
 
