@@ -10,26 +10,51 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Device;
+use App\Jobs\Tasks\DeviceActivator;
+use Hhxsv5\LaravelS\Swoole\Task\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 
 class DeviceController extends Controller
 {
-
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function getStatus(Request $request){
+    public function getStatus(Request $request)
+    {
         $this->validate($request, [
             'id' => 'required|integer'
         ]);
         $id = $request->input("id");
-        $device = Device::fetchOrFailed($id);
+        $device = $this->getDeviceStatus($id);
         return s("ok", [
-           'status' => $device->status,
-           'last_active' => $device->updated_at
+            'status' => $device->status,
+            'last_active' => $device->last_active
         ]);
     }
 
+    public static function getDeviceStatus(int $id)
+    {
+        $redis = Redis::connection('device');
+        $device = $redis->get('device:' . $id);
+        $device = json_decode($device);
+        return $device;
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function getDevicesByLocationId(Request $request)
+    {
+        $this->validate($request, [
+            'location_id' => 'required|integer'
+        ]);
+        $location_id = $request->input("location_id");
+        $devices = (new Device())->where('location_id', '=', $location_id)->orderBy('floor')->get();
+        return $devices;
+    }
 }
