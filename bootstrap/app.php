@@ -56,6 +56,8 @@ $app->singleton(
 
 $app->configure("wechat");
 
+require_once __DIR__."/../app/Helpers/common.php";
+
 /*
 |--------------------------------------------------------------------------
 | Register Middleware
@@ -90,6 +92,7 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 $app->register(\Hhxsv5\LaravelS\Illuminate\LaravelSServiceProvider::class);
+$app->register(\Illuminate\Redis\RedisServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------
