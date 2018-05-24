@@ -10,13 +10,14 @@ namespace App\Http\Controllers\Api;
 
 
 use App\Http\Controllers\Controller;
+use App\Jobs\Tasks\DeviceActivator;
 use App\Models\Device;
 use App\Models\Meta;
 use App\Models\User;
 use App\Models\UserRecord;
+use Hhxsv5\LaravelS\Swoole\Task\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Junning\Sdk\usr\MQTTClient;
 
 class UserController extends Controller
 {
@@ -69,14 +70,8 @@ class UserController extends Controller
         $user->save();
 
         // Push activation request into task queue.
-        $client = new MQTTClient();
-        $client->connect("珺柠", "junning_lc_2018");
-        $client->onConnect = function ($code, MQTTClient $client) {
-            $client->publish("\$USR/DevRx/356566078063039", "123", function (MQTTClient $client) {
-                echo "haha!!!!!!\n";
-                $client->disconnect();
-            });
-        };
+        $task = new DeviceActivator($request->input("id"));
+        Task::deliver($task);
 
         //增加用户记录
         $userRecord = new UserRecord();

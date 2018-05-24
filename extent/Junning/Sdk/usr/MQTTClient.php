@@ -21,10 +21,9 @@ use Swoole\Client;
 class MQTTClient
 {
     protected $client;
-    protected $host = "clouddata.usr.cn";
-   // protected $host = "127.0.0.1";
-    protected $port = 1883;
-    protected $heatbeatInterval = 30;
+    protected $host;
+    protected $port;
+    protected $heartbeatInterval;
     protected $username;
     protected $password;
     protected $callbacks;
@@ -34,6 +33,9 @@ class MQTTClient
     public $onOther;
     public function __construct()
     {
+        $this->host = config('usr.host');
+        $this->port = config('usr.port');
+        $this->heartbeatInterval = config('usr.heartbeatInterval');
         $this->client = new Client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
         $this->client->set([
             'open_length_check' => true,
@@ -47,9 +49,6 @@ class MQTTClient
         $this->client->on("Error", [$this, "__onInnerError"]);
         $this->client->on("Close", [$this, "__onInnerClose"]);
         $this->callbacks = new CallbackPool();
-        swoole_timer_tick($this->heatbeatInterval*1000, function(){
-            $this->ping();
-        });
     }
 
     public function connect($username, $password){
@@ -140,6 +139,9 @@ class MQTTClient
     public function __onInnerMQTTConnectAck($body){
         $fix1 = new FixUnpacker($body,1);
         $fix2 = new FixUnpacker($fix1->left(), 1);
+        swoole_timer_tick($this->heartbeatInterval*1000, function(){
+            $this->ping();
+        });
         if(is_callable($this->onConnect)){
             ($this->onConnect)(ord($fix2->unpack()), $this);
         }
