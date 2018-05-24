@@ -26,8 +26,8 @@ class WechatAuthController extends WsController
         }
         $openid = $ret->openid;
         go(function() use ($openid){
-            $id = $this->updateToken($openid);
-            $this->success(['id' => $id]);
+            $ret = $this->updateToken($openid);
+            $this->success(['uid' => $ret[0], 'api_token'=>$ret[1]]);
         });
     }
 
@@ -46,7 +46,7 @@ class WechatAuthController extends WsController
         $user->api_token = $apiToken;
         $user->wechat_openid = $openid;
         $user->save();
-        return $user->id;
+        return [$user->id, $user->api_token];
     }
 
 }

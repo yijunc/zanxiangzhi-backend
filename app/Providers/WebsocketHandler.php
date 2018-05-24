@@ -20,6 +20,7 @@ class WebsocketHandler implements WebsocketHandlerInterface
 
     public function onOpen(\swoole_websocket_server $server, \swoole_http_request $request)
     {
+        echo "[ info ] "."websocket client on: ".$request->fd;
     }
 
     public function onMessage(\swoole_websocket_server $server, \swoole_websocket_frame $frame)
