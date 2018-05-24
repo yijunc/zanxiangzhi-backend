@@ -14,7 +14,8 @@ $router->group([
 
     //    user相关
     //    $router->get("/user/get_left_times", ["middleware"=>["auth"], "uses"=>"UserController@getLeftTimes"]);
-    //    $router->addRoute(['GET', 'POST'], "/user/get_left_times", ["middleware" => ["auth"], "uses" => "UserController@getLeftTimes"]);
+    $router->addRoute(['GET', 'POST'], "/user/verify_token", ["middleware" => ['auth'], "uses" => "UserController@verifyToken"]);
+    $router->addRoute(['GET', 'POST'], "/user/get_left_times", ["middleware" => ["auth"], "uses" => "UserController@getLeftTimes"]);
     $router->addRoute(['GET', 'POST'], "/user/use_toilet_paper", ["middleware" => ["auth"], "uses" => "UserController@useToiletPaper"]);
 
 
