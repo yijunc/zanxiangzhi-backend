@@ -53,7 +53,7 @@ $app->singleton(
 | Register Configurations
 |--------------------------------------------------------------------------
 */
-
+$app->configure("app");
 $app->configure("wechat");
 $app->configure("usr");
 
