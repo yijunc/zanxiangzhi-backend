@@ -42,9 +42,6 @@ class DeviceCheckActiveJob extends CronJob
         //zn shang
     }
 
-    private function getAllDevices(){
-        return Device::all();
-    }
 
 
 }

@@ -57,17 +57,4 @@ class DeviceController extends Controller
         $devices = (new Device())->where('location_id', '=', $location_id)->orderBy('floor')->get();
         return $devices;
     }
-
-    /**
-     * @param Request $request
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function activateDevice(Request $request)
-    {
-        $this->validate($request, [
-            'id' => 'required|integer'
-        ]);
-        $task = new DeviceActivator($request->input("id"));
-        Task::deliver($task);
-    }
 }
