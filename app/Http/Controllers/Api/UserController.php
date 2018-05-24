@@ -58,7 +58,8 @@ class UserController extends Controller
             'device_id' => 'required|integer'
         ]);
         $device_id = $request->input("device_id");
-        if (DeviceController::getDeviceStatus($device_id)->status == 0) {
+        $deviceStatus = DeviceController::getDeviceStatus($device_id);
+        if (is_null($deviceStatus) || $deviceStatus->status == 0) {
             return f(1, "device unavailable");
         }
         //判断用户剩余抽纸次数并验证

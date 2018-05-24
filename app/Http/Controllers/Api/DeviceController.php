@@ -29,10 +29,14 @@ class DeviceController extends Controller
         ]);
         $id = $request->input("id");
         $device = $this->getDeviceStatus($id);
-        return s("ok", [
-            'status' => $device->status,
-            'last_active' => $device->last_active
-        ]);
+        if($device){
+            return s("ok", [
+                'status' => $device->status,
+                'last_active' => $device->last_active
+            ]);
+        }else{
+            return f(1);
+        }
     }
 
     public static function getDeviceStatus(int $id)
