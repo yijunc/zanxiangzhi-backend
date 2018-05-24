@@ -41,6 +41,7 @@ class UserController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
+     * @throws \Throwable
      */
     public function useToiletPaper(Request $request)
     {
@@ -71,8 +72,7 @@ class UserController extends Controller
 
         // Push activation request into task queue.
         $target_device = Device::find($request->input('device_id'));
-        $task = new DeviceActivator($target_device->tag);
-        Task::deliver($task);
+        app('MQTTService')->activate($target_device->tag);
 
         //增加用户记录
         $userRecord = new UserRecord();

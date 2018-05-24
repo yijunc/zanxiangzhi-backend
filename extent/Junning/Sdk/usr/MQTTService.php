@@ -14,21 +14,26 @@ class MQTTService
 
     protected $usrConnection;
     protected $isOn = false;
+    protected $callbacks;
 
     public function __construct($options = null)
     {
+        $this->callbacks = new CallbackPool();
         $this->usrConnection = new MQTTClient();
-        $this->usrConnection->onConnect = function (MQTTClient $client) {
+        $this->usrConnection->onConnect = function ($code, MQTTClient $client) {
             $this->isOn = true;
+            $this->callbacks->callAll();
         };
         $this->usrConnection->onClose = function (MQTTClient $client) {
             $this->isOn = false;
+            swoole_timer_after(config("usr.time_out_interval"), function(){
+                $this->connect();
+            });
         };
     }
 
     public function connect($callback = null)
     {
-        echo "in __connect \n";
         if ($this->isOn) {
             if (is_callable($callback)) {
                 call_user_func($callback);
@@ -36,29 +41,24 @@ class MQTTService
             return;
         }
         $this->usrConnection->connect(config('usr.usrAccount'), config('usr.usrPassword'));
+        if(is_callable($callback)){
+            $this->callbacks->push($callback);
+        }
     }
 
     public function activate($device_tag)
     {
-        echo "in __activate \n";
-        $this->usrConnection->publish('$USR/DevRx/' . $device_tag, config('usr.activationCode'),
-            function (MQTTClient $client) {
-                echo "adsfasdfafa\n";
-        });
+        if($this->isOn){
+            $this->usrConnection->publish('$USR/DevRx/' . $device_tag, config('usr.activationCode'),
+                function (MQTTClient $client) {
 
-    }
-
-    public function __call($name, $arguments)
-    {
-        echo "in __call \n";
-        if ($this->isOn) {
-            return call_user_func_array($name, $arguments);
-        } else {
-            $this->connect(function () use ($name, $arguments) {
-                call_user_func_array($name, $arguments);
+                });
+        }else{
+            $this->connect(function() use ($device_tag){
+               $this->activate($device_tag);
             });
-            return true;
         }
     }
+
 
 }
