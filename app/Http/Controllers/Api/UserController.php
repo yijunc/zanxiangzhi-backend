@@ -21,6 +21,11 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+    public function verifyToken()
+    {
+        return s();
+    }
+
     public function getLeftTimes()
     {
         $user = Auth::user();
