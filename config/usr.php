@@ -13,5 +13,6 @@ return [
     'usrAccount' => '珺柠',
     'usrPassword' => 'junning_lc_2018',
     'activationCode' => 'TBD',
+    'time_out_interval' => 2000,
 
 ];
