@@ -57,7 +57,7 @@ class LocationController extends Controller
         $latitude = $request->input('latitude');
         $geohash = new GeoHash();
         $current_location_hash = $geohash->encode($latitude, $longitude);
-        $location_prefix = substr($current_location_hash, 0, 6);
+        $location_prefix = substr($current_location_hash, 0, 7);
         $neighbours = $geohash->neighbors($location_prefix);
         array_push($neighbours, $location_prefix);
         $locations = array();
