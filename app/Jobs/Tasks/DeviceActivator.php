@@ -13,14 +13,14 @@ use Hhxsv5\LaravelS\Swoole\Task\Task;
 
 class DeviceActivator extends Task
 {
-    protected $deviceId;
-    public function __construct($id)
+    protected $deviceTag;
+    public function __construct($tag)
     {
-        $this->deviceId = $id;
+        $this->deviceTag = $tag;
     }
 
     public function handle()
     {
-        // TODO: Implement handle() method.
+        app('MQTTService')->activate($this->deviceTag);
     }
 }

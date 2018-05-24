@@ -70,7 +70,8 @@ class UserController extends Controller
         $user->save();
 
         // Push activation request into task queue.
-        $task = new DeviceActivator($request->input("id"));
+        $target_device = Device::find($request->input('device_id'));
+        $task = new DeviceActivator($target_device->tag);
         Task::deliver($task);
 
         //增加用户记录
