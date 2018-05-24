@@ -30,7 +30,7 @@ class UserController extends Controller
     {
         $user = Auth::user();
         $lastPullDown = date('Y-m-d', $user->last_pull_down);
-        $pullDownTimes = $user->pull_down_times;
+        $pullDownTimes = is_null($user->pull_down_times)?0:$user->pull_down_times;
         $times = config('app.pull_down_times_per_day');
         $today = date('Y-m-d');
         $leftTimes = $times - $pullDownTimes;
