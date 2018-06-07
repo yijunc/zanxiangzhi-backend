@@ -90,7 +90,7 @@ class UserController extends Controller
         ]);
 
         //点赞元数据增加
-        $meta = (new Meta())->where("key","device_used_count")->get();
+        $meta = (new Meta())->where("key","device_used_count")->firstOrFail();
         $meta->value += 1;
         $meta->saveOrFail();
         //机器使用次数更新
