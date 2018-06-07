@@ -99,7 +99,7 @@ class UserController extends Controller
         //返回剩余可用次数和点赞总数
         return s("ok", [
             "left_times" => $leftTimes - 1,
-            "device_used_count" => $meta->value
+            "thumbs_up_count" => $meta->value
         ]);
     }
 
