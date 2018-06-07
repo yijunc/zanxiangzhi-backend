@@ -90,15 +90,16 @@ class UserController extends Controller
         ]);
 
         //点赞元数据增加
-        $meta = (new Meta())->findOrFail($device_id);
+        $meta = (new Meta())->where("key","device_used_count")->get();
         $meta->value += 1;
         $meta->saveOrFail();
         //机器使用次数更新
         $device = (new Device())->findOrFail($device_id);
         $device->update(["used_count" => $device->used_count + 1]);
-        //返回剩余可用次数
+        //返回剩余可用次数和点赞总数
         return s("ok", [
-            "left_times" => $leftTimes - 1
+            "left_times" => $leftTimes - 1,
+            "device_used_count" => $meta->value
         ]);
     }
 
