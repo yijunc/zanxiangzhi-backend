@@ -55,13 +55,16 @@ class UserController extends Controller
          */
         //判断机器可用
         $this->validate($request, [
-            'device_id' => 'required|integer'
+            'device_id' => 'required|integer',
+            'period' => 'required|integer|min:5|max:10'
         ]);
         $device_id = $request->input("device_id");
+        $acitvation_period = $request->input("period");
         $deviceStatus = DeviceController::getDeviceStatus($device_id);
         if (is_null($deviceStatus) || $deviceStatus->status == 0) {
             return f(1, "device unavailable");
         }
+
         //判断用户剩余抽纸次数并验证
         $user = Auth::user();
         $ret = $this->getLeftTimes();
@@ -78,7 +81,7 @@ class UserController extends Controller
 
         // Push activation request into task queue.
         $target_device = Device::find($request->input('device_id'));
-        app('MQTTService')->activate($target_device->tag);
+        app('MQTTService')->activate($target_device->tag, $acitvation_period);
 
         //增加用户记录
         $userRecord = new UserRecord();
@@ -93,9 +96,11 @@ class UserController extends Controller
         $meta = (new Meta())->findOrFail($device_id);
         $meta->value += 1;
         $meta->saveOrFail();
+
         //机器使用次数更新
         $device = (new Device())->findOrFail($device_id);
         $device->update(["used_count" => $device->used_count + 1]);
+
         //返回剩余可用次数
         return s("ok", [
             "left_times" => $leftTimes - 1

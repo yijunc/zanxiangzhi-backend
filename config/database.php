@@ -91,16 +91,16 @@ return [
 
         'default' => [
             'host'     => env('REDIS_HOST', '127.0.0.1'),
-            'port'     => env('REDIS_PORT', 6379),
+            'port'     => env('REDIS_PORT', 6375),
             'database' => env('REDIS_DATABASE', 0),
             'password' => env('REDIS_PASSWORD', null),
         ],
 
         'device' => [
-            'host' => '120.24.250.38',
-            'port' => 6379,
+            'host' => '127.0.0.1',
+            'port' => 6375,
             'database' => 1,
-            'password' => 'Cezhi12345'
+            'password' => null
         ]
 
     ],
