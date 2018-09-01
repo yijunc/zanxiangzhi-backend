@@ -56,10 +56,10 @@ class UserController extends Controller
         //判断机器可用
         $this->validate($request, [
             'device_id' => 'required|integer',
-            'period' => 'required|integer|min:5|max:10'
+            'period' => 'required|integer|min:5|max:9'
         ]);
         $device_id = $request->input("device_id");
-        $acitvation_period = $request->input("period");
+        $activation_period = $request->input("period");
         $deviceStatus = DeviceController::getDeviceStatus($device_id);
         if (is_null($deviceStatus) || $deviceStatus->status == 0) {
             return f(1, "device unavailable");
@@ -81,7 +81,7 @@ class UserController extends Controller
 
         // Push activation request into task queue.
         $target_device = Device::find($request->input('device_id'));
-        app('MQTTService')->activate($target_device->tag, $acitvation_period);
+        app('MQTTService')->activate($target_device->tag, $activation_period);
 
         //增加用户记录
         $userRecord = new UserRecord();
@@ -93,7 +93,7 @@ class UserController extends Controller
         ]);
 
         //点赞元数据增加
-        $meta = (new Meta())->findOrFail($device_id);
+        $meta = Meta::where('key', 'device_used_count')->firstOrFail();
         $meta->value += 1;
         $meta->saveOrFail();
 
@@ -103,7 +103,8 @@ class UserController extends Controller
 
         //返回剩余可用次数
         return s("ok", [
-            "left_times" => $leftTimes - 1
+            "left_times" => $leftTimes - 1,
+            "thumbs_up_count" => $meta->value
         ]);
     }
 

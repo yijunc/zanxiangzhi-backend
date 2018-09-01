@@ -48,8 +48,9 @@ class MQTTService
 
     public function activate($device_tag, $activation_period)
     {
+//        base_convert($activation_period, 10, 16);
         if($this->isOn){
-            $this->usrConnection->publish('$USR/DevRx/' . $device_tag, base_convert($activation_period, 10, 16),
+            $this->usrConnection->publish('$USR/DevRx/' . $device_tag, $activation_period,
                 function (MQTTClient $client) {
 
                 });
