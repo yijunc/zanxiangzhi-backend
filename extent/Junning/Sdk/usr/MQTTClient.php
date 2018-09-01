@@ -86,8 +86,8 @@ class MQTTClient
 
     protected function send($data, $header = 0x10){
         $fixed = new FixedHeader($data, $header);
-        echo "I SENT: ";
-        Converter::show($fixed->pack());
+//        echo "I SENT: ";
+//        Converter::show($fixed->pack());
         return $this->client->send($fixed->pack());
     }
 
@@ -109,7 +109,7 @@ class MQTTClient
     }
 
     public function __onInnerReceive(Client $client, $data){
-        Converter::show($data);
+//        Converter::show($data);
         $codeUpk = new FixUnpacker($data, 1);
         $code = $codeUpk->unpack();
         $bodyUpk = new Unpacker($codeUpk->left(), 1);
@@ -174,7 +174,7 @@ class MQTTClient
     }
 
     public function __onInnerClose(Client $client){
-        echo "onClose!\n";
+//        echo "onClose!\n";
         if(is_callable($this->onClose)){
             ($this->onClose)($this);
         }

@@ -101,7 +101,8 @@ class UserController extends Controller
         $device = (new Device())->findOrFail($device_id);
         $device->update(["used_count" => $device->used_count + 1]);
 
-        //返回剩余可用次数
+
+        //返回剩余可用次数和点赞总数
         return s("ok", [
             "left_times" => $leftTimes - 1,
             "thumbs_up_count" => $meta->value
