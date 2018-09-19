@@ -65,7 +65,7 @@ class UserController extends Controller
             return f(1, "device unavailable");
         }
 
-        $activation_period_code = '1'.str_repeat('0', $activation_period);
+        $activation_period_code = '1'.str_repeat('0', $activation_period + 1);
 
         //判断用户剩余抽纸次数并验证
         $user = Auth::user();
