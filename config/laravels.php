@@ -28,6 +28,7 @@ return [
             //\Hhxsv5\LaravelS\Illuminate\LaravelScheduleJob::class,
             //\App\Jobs\Timers\AutoReloadCronJob::class,
             \App\Jobs\Timers\DeviceCheckActiveJob::class,
+            \App\Jobs\Timers\WeAccessTokenRefresh::class,
 
         ],
     ],

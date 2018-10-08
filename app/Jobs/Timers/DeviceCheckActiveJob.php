@@ -29,14 +29,6 @@ class DeviceCheckActiveJob extends CronJob
         return $this->interval;
     }
 
-    /**
-     * @return bool $isImmediate
-     */
-    public function isImmediate()
-    {
-        return false;
-    }
-
     public function run()
     {
         //zn shang

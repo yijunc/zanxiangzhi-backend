@@ -22,4 +22,9 @@ $router->group([
     //    location related
     $router->get("/location/get_nearby_locations", "LocationController@getNearbyLocations");
     $router->get("/location/add_location", "LocationController@addLocation");
+
+    // wechat open platform
+    $router->post("/wechatop", "WeChatOpenPlatController@process");
+    $router->get("/wechatop", "WeChatOpenPlatController@firstTimeTokenReply");
+
 });

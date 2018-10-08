@@ -11,6 +11,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\Tasks\DeviceActivator;
+use App\Jobs\Tasks\WechatOpenPlatNotifyTask;
 use App\Models\Device;
 use App\Models\Meta;
 use App\Models\User;
@@ -18,6 +19,7 @@ use App\Models\UserRecord;
 use Hhxsv5\LaravelS\Swoole\Task\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use phpDocumentor\Reflection\Location;
 
 class UserController extends Controller
 {
@@ -65,6 +67,11 @@ class UserController extends Controller
             return f(1, "device unavailable");
         }
 
+        $device = (new Device())->findOrFail($device_id);
+        if(is_null($device->left_segment_count) || $device->left_segment_count - $activation_period <= 0) {
+            return f(1, "device unavailable");
+        }
+
         $activation_period_code = '1'.str_repeat('0', $activation_period + 1);
 
         //判断用户剩余抽纸次数并验证
@@ -103,6 +110,33 @@ class UserController extends Controller
         $device = (new Device())->findOrFail($device_id);
         $device->update(["used_count" => $device->used_count + 1]);
 
+        if(is_null($device->left_segment_count) || $device->left_segment_count - $activation_period <= 0) {
+            $device->update(["left_segment_count" => 0]);
+            $task = new WechatOpenPlatNotifyTask(config("wechat.open_plat_maintain_template"),
+                [
+                    'first' => [
+                        'value' => $device->id,
+                        'color' => '#000000',
+                    ],
+                    'keyword1' => [
+                        'value' => 'Need Maintenance',
+                        'color' => '#000000',
+                    ],
+                    'keyword2' => [
+                        'value' => date("Y-m-d h:i:sa"),
+                        'color' => '#000000',
+                    ],
+                    'remark' => [
+                        'value' => $device->location_desc,
+                        'color' => '#000000',
+                    ]
+                ]
+                );
+            // $task->delay(3);// 延迟3秒投放任务
+            Task::deliver($task);
+        } else {
+            $device->update(["left_segment_count" => $device->left_segment_count - $activation_period]);
+        }
 
         //返回剩余可用次数和点赞总数
         return s("ok", [
