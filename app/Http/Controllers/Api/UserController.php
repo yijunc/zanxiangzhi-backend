@@ -32,7 +32,7 @@ class UserController extends Controller
     {
         $user = Auth::user();
         $lastPullDown = date('Y-m-d', $user->last_pull_down);
-        $pullDownTimes = is_null($user->pull_down_times)?0:$user->pull_down_times;
+        $pullDownTimes = is_null($user->pull_down_times) ? 0 : $user->pull_down_times;
         $times = config('app.pull_down_times_per_day');
         $today = date('Y-m-d');
         $leftTimes = $times - $pullDownTimes;
@@ -42,6 +42,32 @@ class UserController extends Controller
         return s("ok", [
             "left_times" => $leftTimes
         ]);
+    }
+
+    private function sendMaintainNotification($deviceId, $locationDescription)
+    {
+        $task = new WechatOpenPlatNotifyTask(config("wechat.open_plat_maintain_template"),
+            [
+                'first' => [
+                    'value' => $deviceId,
+                    'color' => '#FF0000',
+                ],
+                'keyword1' => [
+                    'value' => 'Need Maintenance',
+                    'color' => '#FF0000',
+                ],
+                'keyword2' => [
+                    'value' => date("Y-m-d h:i:sa"),
+                    'color' => '#000000',
+                ],
+                'remark' => [
+                    'value' => $locationDescription,
+                    'color' => '#000000',
+                ]
+            ]
+        );
+        // $task->delay(3);// 延迟3秒投放任务
+        Task::deliver($task);
     }
 
     /**
@@ -68,11 +94,11 @@ class UserController extends Controller
         }
 
         $device = (new Device())->findOrFail($device_id);
-        if(is_null($device->left_segment_count) || $device->left_segment_count - $activation_period <= 0) {
+        if (is_null($device->left_segment_count) || $device->left_segment_count - $activation_period <= 0) {
             return f(1, "device unavailable");
         }
 
-        $activation_period_code = '1'.str_repeat('0', $activation_period + 1);
+        $activation_period_code = '1' . str_repeat('0', $activation_period + 1);
 
         //判断用户剩余抽纸次数并验证
         $user = Auth::user();
@@ -97,7 +123,7 @@ class UserController extends Controller
         $userRecord->create([
             "user_id" => $user->id,
             "device_id" => $device_id,
-            "type" => 0,
+            "type" => $activation_period,
             "status" => 0
         ]);
 
@@ -112,28 +138,7 @@ class UserController extends Controller
 
         if(is_null($device->left_segment_count) || $device->left_segment_count - $activation_period <= 0) {
             $device->update(["left_segment_count" => 0]);
-            $task = new WechatOpenPlatNotifyTask(config("wechat.open_plat_maintain_template"),
-                [
-                    'first' => [
-                        'value' => $device->id,
-                        'color' => '#000000',
-                    ],
-                    'keyword1' => [
-                        'value' => 'Need Maintenance',
-                        'color' => '#000000',
-                    ],
-                    'keyword2' => [
-                        'value' => date("Y-m-d h:i:sa"),
-                        'color' => '#000000',
-                    ],
-                    'remark' => [
-                        'value' => $device->location_desc,
-                        'color' => '#000000',
-                    ]
-                ]
-                );
-            // $task->delay(3);// 延迟3秒投放任务
-            Task::deliver($task);
+            $this->sendMaintainNotification($device->id, $device->location_desc);
         } else {
             $device->update(["left_segment_count" => $device->left_segment_count - $activation_period]);
         }

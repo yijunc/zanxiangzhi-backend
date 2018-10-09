@@ -9,28 +9,63 @@
 namespace App\Http\Controllers\Api;
 
 
+use App\Jobs\Tasks\WechatOpenPlatNotifyTask;
+use App\Models\Admin;
 use App\Models\Meta;
+use Hhxsv5\LaravelS\Swoole\Task\Task;
 use Illuminate\Http\Request;
 
 class WeChatOpenPlatController
 {
-    public function process(Request $request){
+    public function process(Request $request)
+    {
         $msg = $request->getContent();
 
-        //var_dump($msg);
+        // parse xml from wechat server
 
-        $meta = new Meta();
-        $meta->key = 'latest_msg';
-        $meta->value = $msg;
+        $obj = simplexml_load_string($msg, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $eJSON = json_encode($obj);
+        $dJSON = json_decode($eJSON);
+        $openId = $dJSON->FromUserName;
 
-        $meta->save();
+        $task = new WechatOpenPlatNotifyTask(config("wechat.open_plat_maintain_template"),
+            [
+                'first' => [
+                    'value' => '0000',
+                    'color' => '#000000',
+                ],
+                'keyword1' => [
+                    'value' => 'Need Maintenance',
+                    'color' => '#000000',
+                ],
+                'keyword2' => [
+                    'value' => date("Y-m-d h:i:sa"),
+                    'color' => '#000000',
+                ],
+                'remark' => [
+                    'value' => 'xxx',
+                    'color' => '#000000',
+                ]
+            ]
+        );
+        Task::deliver($task);
 
-        return 'success';
-     }
+        $admin = Admin::where('openid', $openId)->firstOrFail();
+        if ($admin != null) {
+            return '';
+        }
 
-     public function firstTimeTokenReply(Request $request){
+        $admin = (new Admin());
+        $admin->openid = $openId;
+        $admin->save();
 
+        return '';
+    }
+
+    public function firstTimeTokenReply(Request $request)
+    {
+//        var_dump($request);
         return $request->get("echostr");
 
-     }
+    }
 }

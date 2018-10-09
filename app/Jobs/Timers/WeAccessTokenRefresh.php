@@ -38,6 +38,7 @@ class WeAccessTokenRefresh extends CronJob
             'secret' => config("wechat.open_plat_secret")
         ], function($data){
            $data = json_decode($data->body)->access_token;
+           // var_dump($data);
            $meta = Meta::where('key', 'wechat_access_token')->firstOrFail();
            $meta->value = $data;
            $meta->save();

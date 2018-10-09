@@ -17,7 +17,7 @@ class Device extends Model
      * @var array
      */
     protected $fillable = [
-        'id', 'tag', 'location_desc', 'location_id', 'used_count', 'created_at', 'updated_at', 'is_operating',
+        'id', 'tag', 'location_desc', 'location_id', 'used_count', 'created_at', 'updated_at', 'is_operating', 'left_segment_count'
     ];
 
     protected $hidden = [];

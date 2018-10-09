@@ -12,29 +12,6 @@ namespace Junning\Swoole;
 class AsyncCurl
 {
 
-    public static function runJSON($host, $port, $domain, $path, $callback, $data = [], $ssl = true, $timeout = 1){
-        if(!Curl::isIp($host)){
-            swoole_async_dns_lookup($host, function($origin, $ip) use ($port, $domain, $path, $callback, $post, $data, $ssl, $timeout){
-                self::innerRunJSON($ip, $port, $domain, $path, $callback, $data, $ssl, $timeout);
-            });
-        }else{
-            self::innerRunJSON($host, $port, $domain, $path, $callback, $data = [], $ssl = true, $timeout = 1);
-        }
-    }
-
-    private static function innerRunJSON($host, $port, $domain, $path, $callback, $data = [], $ssl = true, $timeout = 1){
-        $cli = new \swoole_http_client($host, $port, $ssl);
-        $cli->setHeaders([
-            'Host' => $domain,
-            'Content-Type'=>'application/json',
-            "User-Agent" => 'Chrome/49.0.2587.3',
-            'Accept' => 'text/html,application/xhtml+xml,application/xml,application/json,text/json',
-            'Accept-Encoding' => 'gzip',
-        ]);
-        $cli->set(['timeout' => $timeout]);
-        $cli->post($path, json_encode($data), $callback);
-    }
-
     public static function run($host, $port, $domain, $path, $callback, $post = false, $data = [], $ssl = true, $timeout = 1){
         if(!Curl::isIp($host)){
             swoole_async_dns_lookup($host, function($origin, $ip) use ($port, $domain, $path, $callback, $post, $data, $ssl, $timeout){
@@ -70,9 +47,6 @@ class AsyncCurl
         self::run($host, $port, $domain, $path, $callback,false, $data, $ssl, $timeout);
     }
 
-    public static function postJSON($host, $port, $domain, $path, $data = [], $callback, $ssl = true, $timeout = 1){
-        self::runJSON($host, $port, $domain, $path, $callback, $data, $ssl, $timeout);
-    }
 
     public static function post($host, $port, $domain, $path, $data = [], $callback, $ssl = true, $timeout = 1){
         self::run($host, $port, $domain, $path, $callback,true, $data, $ssl, $timeout);

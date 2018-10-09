@@ -39,6 +39,7 @@ class Curl
         return $cli->body;
     }
 
+
     public static function get($host, $port, $domain, $path, $data = [], $ssl = true, $timeout = 1){
         return self::run($host, $port, $domain, $path, false, $data, $ssl, $timeout);
     }
