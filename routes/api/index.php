@@ -24,7 +24,7 @@ $router->group([
     $router->get("/location/add_location", "LocationController@addLocation");
 
     // wechat open platform
-    $router->post("/wechatop", "WeChatOpenPlatController@process");
+    $router->post("/wechatop", "WeChatOpenPlatController@processWeChatMessage");
     $router->get("/wechatop", "WeChatOpenPlatController@firstTimeTokenReply");
 
 });

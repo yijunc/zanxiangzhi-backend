@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 
 class WeChatOpenPlatController
 {
-    public function process(Request $request)
+    public function processWeChatMessage(Request $request)
     {
         $msg = $request->getContent();
 
@@ -27,39 +27,35 @@ class WeChatOpenPlatController
         $eJSON = json_encode($obj);
         $dJSON = json_decode($eJSON);
         $openId = $dJSON->FromUserName;
+        $message = $dJSON->Content;
+        if ($message == 'admin') {
 
-        $task = new WechatOpenPlatNotifyTask(config("wechat.open_plat_maintain_template"),
-            [
-                'first' => [
-                    'value' => '0000',
-                    'color' => '#000000',
-                ],
-                'keyword1' => [
-                    'value' => 'Need Maintenance',
-                    'color' => '#000000',
-                ],
-                'keyword2' => [
-                    'value' => date("Y-m-d h:i:sa"),
-                    'color' => '#000000',
-                ],
-                'remark' => [
-                    'value' => 'xxx',
-                    'color' => '#000000',
+            Admin::firstOrCreate(['openid' => $openId]);
+
+            $task = new WechatOpenPlatNotifyTask(config("wechat.open_plat_maintain_template"),
+                [
+                    'first' => [
+                        'value' => 'Admin Request Approved.',
+                        'color' => '#FF0000',
+                    ],
+                    'keyword1' => [
+                        'value' => 'Admin Approved.',
+                        'color' => '#FF0000',
+                    ],
+                    'keyword2' => [
+                        'value' => date("Y-m-d h:i:sa"),
+                        'color' => '#000000',
+                    ],
+                    'remark' => [
+                        'value' => 'www.zanxiangzhi.com',
+                        'color' => '#000000',
+                    ]
                 ]
-            ]
-        );
-        Task::deliver($task);
+            );
+            Task::deliver($task);
 
-        $admin = Admin::where('openid', $openId)->firstOrFail();
-        if ($admin != null) {
-            return '';
         }
-
-        $admin = (new Admin());
-        $admin->openid = $openId;
-        $admin->save();
-
-        return '';
+        return 'success';
     }
 
     public function firstTimeTokenReply(Request $request)
