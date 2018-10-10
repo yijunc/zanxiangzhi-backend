@@ -36,6 +36,9 @@ class UserController extends Controller
         $times = config('app.pull_down_times_per_day');
         $today = date('Y-m-d');
         $leftTimes = $times - $pullDownTimes;
+        if($leftTimes <= 0){
+            $leftTimes = 0;
+        }
         if ($lastPullDown != $today) {
             $leftTimes = $times;
         }
@@ -49,7 +52,7 @@ class UserController extends Controller
         $task = new WechatOpenPlatNotifyTask(config("wechat.open_plat_maintain_template"),
             [
                 'first' => [
-                    'value' => $deviceId,
+                    'value' => 'Device Low Paper. Id:'.$deviceId,
                     'color' => '#FF0000',
                 ],
                 'keyword1' => [
@@ -66,7 +69,6 @@ class UserController extends Controller
                 ]
             ]
         );
-        // $task->delay(3);// 延迟3秒投放任务
         Task::deliver($task);
     }
 
@@ -94,7 +96,8 @@ class UserController extends Controller
         }
 
         $device = (new Device())->findOrFail($device_id);
-        if (is_null($device->left_segment_count) || $device->left_segment_count - $activation_period <= 0) {
+        if (is_null($device->left_segment_count) || $device->left_segment_count - $activation_period < 0) {
+            $this->sendMaintainNotification($device->id, $device->location_desc);
             return f(1, "device unavailable");
         }
 
@@ -107,11 +110,11 @@ class UserController extends Controller
         $retLeftTimes = json_decode($ret);
         $leftTimes = $retLeftTimes->data->left_times;
         $times = config('app.pull_down_times_per_day');
-        if ($leftTimes == 0) {
+        if ($leftTimes <= 0) {
             return f(2);
         }
         $user->last_pull_down = time();
-        $user->pull_down_times = $times - $leftTimes + 1;
+        $user->pull_down_times = $times - $leftTimes + $activation_period;
         $user->save();
 
         // Push activation request into task queue.
@@ -145,7 +148,7 @@ class UserController extends Controller
 
         //返回剩余可用次数和点赞总数
         return s("ok", [
-            "left_times" => $leftTimes - 1,
+            "left_times" => $leftTimes - $activation_period,
             "thumbs_up_count" => $meta->value
         ]);
     }
