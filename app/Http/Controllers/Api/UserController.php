@@ -52,11 +52,11 @@ class UserController extends Controller
         $task = new WechatOpenPlatNotifyTask(config("wechat.open_plat_maintain_template"),
             [
                 'first' => [
-                    'value' => 'Device Low Paper. Id:'.$deviceId,
+                    'value' => '设备纸量警告，设备编号：'.$deviceId,
                     'color' => '#FF0000',
                 ],
                 'keyword1' => [
-                    'value' => 'Need Maintenance',
+                    'value' => '需要维护',
                     'color' => '#FF0000',
                 ],
                 'keyword2' => [
@@ -98,7 +98,7 @@ class UserController extends Controller
         $device = (new Device())->findOrFail($device_id);
         if (is_null($device->left_segment_count) || $device->left_segment_count - $activation_period < 0) {
             $this->sendMaintainNotification($device->id, $device->location_desc);
-            return f(1, "device unavailable");
+//            return f(1, "device unavailable");
         }
 
         $activation_period_code = '1' . str_repeat('0', $activation_period + 1);

@@ -16,10 +16,11 @@ use Junning\Swoole\AsyncCurl;
 class WeAccessTokenRefresh extends CronJob
 {
     protected $interval = 7200000;
+
     public function __construct()
     {
         $this->run();
-        echo "[ info ] ".'access token refreshing workers at an interval of '.$this->interval."ms\n";
+        echo "[ info ] " . 'access token refreshing workers at an interval of ' . $this->interval . "ms\n";
     }
 
     /**
@@ -36,12 +37,15 @@ class WeAccessTokenRefresh extends CronJob
             'grant_type' => 'client_credential',
             'appid' => config("wechat.open_plat_id"),
             'secret' => config("wechat.open_plat_secret")
-        ], function($data){
-           $data = json_decode($data->body)->access_token;
-           // var_dump($data);
-           $meta = Meta::where('key', 'wechat_access_token')->firstOrFail();
-           $meta->value = $data;
-           $meta->save();
+        ], function ($data) {
+//            var_dump($data);
+//            date_default_timezone_set('PRC');
+            var_dump(date("Y-m-d h:i:sa"));
+            $data = json_decode($data->body)->access_token;
+
+            $meta = Meta::where('key', 'wechat_access_token')->firstOrFail();
+            $meta->value = $data;
+            $meta->save();
         });
     }
 }

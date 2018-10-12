@@ -11,6 +11,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Jobs\Tasks\WechatOpenPlatNotifyTask;
 use App\Models\Admin;
+use App\Models\Device;
 use App\Models\Meta;
 use Hhxsv5\LaravelS\Swoole\Task\Task;
 use Illuminate\Http\Request;
@@ -28,18 +29,20 @@ class WeChatOpenPlatController
         $dJSON = json_decode($eJSON);
         $openId = $dJSON->FromUserName;
         $message = $dJSON->Content;
-        if ($message == 'admin') {
-
+        $actions = explode(':', $message);
+        if ($actions[0] == 'admin') {
+            if(count($actions) != 2){
+                return 'success';
+            }
             Admin::firstOrCreate(['openid' => $openId]);
-
             $task = new WechatOpenPlatNotifyTask(config("wechat.open_plat_maintain_template"),
                 [
                     'first' => [
-                        'value' => 'Admin Request Approved.',
+                        'value' => '管理员请求通过',
                         'color' => '#FF0000',
                     ],
                     'keyword1' => [
-                        'value' => 'Admin Approved.',
+                        'value' => $actions[1],
                         'color' => '#FF0000',
                     ],
                     'keyword2' => [
@@ -47,13 +50,44 @@ class WeChatOpenPlatController
                         'color' => '#000000',
                     ],
                     'remark' => [
-                        'value' => 'www.zanxiangzhi.com',
+                        'value' => $openId,
                         'color' => '#000000',
                     ]
                 ]
             );
             Task::deliver($task);
-
+        } else if ($actions[0] == 'reset') {
+            if (count($actions) != 3) {
+                return 'success';
+            }
+            $retMessage = '请求重置参数不正确（reset:id:amount)';
+            $device = Device::find($actions[1]);
+            if ($device != null && is_numeric($actions[2]) && $actions[2] <= 2500 && $actions[2] > 0) {
+                $device->left_segment_count = $actions[2];
+                $device->save();
+                $retMessage = '设备' . $actions[1] . '被重置';
+            }
+            $task = new WechatOpenPlatNotifyTask(config("wechat.open_plat_maintain_template"),
+                [
+                    'first' => [
+                        'value' => '请求重置',
+                        'color' => '#FF0000',
+                    ],
+                    'keyword1' => [
+                        'value' => $retMessage,
+                        'color' => '#FF0000',
+                    ],
+                    'keyword2' => [
+                        'value' => date("Y-m-d h:i:sa"),
+                        'color' => '#000000',
+                    ],
+                    'remark' => [
+                        'value' => $openId,
+                        'color' => '#000000',
+                    ]
+                ]
+            );
+            Task::deliver($task);
         }
         return 'success';
     }
