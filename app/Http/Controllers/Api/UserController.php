@@ -86,7 +86,7 @@ class UserController extends Controller
         //判断机器可用
         $this->validate($request, [
             'device_id' => 'required|integer',
-            'period' => 'required|integer|min:1|max:4'
+            'period' => 'required|integer|min:2|max:5'
         ]);
         $device_id = $request->input("device_id");
         $activation_period = $request->input("period");

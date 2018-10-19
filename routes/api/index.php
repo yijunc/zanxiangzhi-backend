@@ -11,6 +11,7 @@ $router->group([
     //    device相关
     $router->get("/device/get_status", "DeviceController@getStatus");
     $router->get("/device/get_devices_by_location_id", "DeviceController@getDevicesByLocationId");
+    $router->post("/device/report", ["middleware" => ['auth'], "uses" => "DeviceController@reportDeviceProblem"]);
 
     //    user相关
     //    $router->get("/user/get_left_times", ["middleware"=>["auth"], "uses"=>"UserController@getLeftTimes"]);
@@ -26,5 +27,6 @@ $router->group([
     // wechat open platform
     $router->post("/wechatop", "WeChatOpenPlatController@processWeChatMessage");
     $router->get("/wechatop", "WeChatOpenPlatController@firstTimeTokenReply");
+
 
 });

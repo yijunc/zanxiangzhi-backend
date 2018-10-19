@@ -62,7 +62,7 @@ class WeChatOpenPlatController
             }
             $retMessage = '请求重置参数不正确（reset:id:amount)';
             $device = Device::find($actions[1]);
-            if ($device != null && is_numeric($actions[2]) && $actions[2] <= 2500 && $actions[2] > 0) {
+            if ($device != null && is_numeric($actions[2]) && $actions[2] <= 50000 && $actions[2] > 0) {
                 $device->left_segment_count = $actions[2];
                 $device->save();
                 $retMessage = '设备' . $actions[1] . '被重置';
